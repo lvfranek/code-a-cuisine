@@ -1,4 +1,4 @@
-const MOCK_RECIPES = [
+export const MOCK_RECIPES = [
   {
     id: 1,
     name: "Herb-Crusted Chicken Piccata",
@@ -8,6 +8,7 @@ const MOCK_RECIPES = [
     cuisine: "Italian",
     dietTags: ["Gluten-Free"],
     portions: 2,
+    nutrition: { calories: 420, protein: 38, carbs: 6, fat: 27 },
     ingredients: [
       "300g chicken breast, butterflied thin",
       "2 tbsp capers, drained",
@@ -37,6 +38,7 @@ const MOCK_RECIPES = [
     cuisine: "Mediterranean",
     dietTags: ["Gluten-Free", "Dairy-Free"],
     portions: 2,
+    nutrition: { calories: 480, protein: 40, carbs: 18, fat: 28 },
     ingredients: [
       "300g chicken breast, cut into 3cm cubes",
       "1 tsp ground cumin",
@@ -68,6 +70,7 @@ const MOCK_RECIPES = [
     cuisine: "Italian",
     dietTags: ["Gluten-Free"],
     portions: 2,
+    nutrition: { calories: 510, protein: 36, carbs: 10, fat: 36 },
     ingredients: [
       "300g chicken breast, sliced 1cm thick",
       "100ml double cream",

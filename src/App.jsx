@@ -4,6 +4,9 @@ import StepIngredients from './components/StepIngredients';
 import StepPreferences from './components/StepPreferences';
 import LoadingScreen from './components/LoadingScreen';
 import ResultsPage from './components/ResultsPage';
+import CookbookPage from './components/CookbookPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import { generateRecipes } from './api';
 
 const DEFAULT_PREFS = {
@@ -43,18 +46,34 @@ function StepIndicator({ current }) {
   );
 }
 
-function Navbar() {
+function Navbar({ page, onNavigate }) {
   return (
     <header className="navbar">
       <div className="navbar-inner">
-        <div className="navbar-side navbar-left" />
+        <div className="navbar-side navbar-left">
+          <button
+            className={`btn--nav ${page === 'generator' ? 'btn--nav-active' : ''}`}
+            onClick={() => onNavigate('generator')}
+            aria-current={page === 'generator' ? 'page' : undefined}
+          >
+            Generator
+          </button>
+        </div>
         <div className="navbar-center">
-          <span className="nav-logo" aria-label="Code a Cuisine — home">
-            Code a <em>Cuisine</em>
-          </span>
+          <button
+            className="nav-logo-btn"
+            onClick={() => onNavigate('generator')}
+            aria-label="Code a Cuisine — go to generator"
+          >
+            <span className="nav-logo">Code a <em>Cuisine</em></span>
+          </button>
         </div>
         <div className="navbar-side navbar-right">
-          <button className="btn--nav" aria-label="Recipe Book — coming soon">
+          <button
+            className={`btn--nav ${page === 'cookbook' ? 'btn--nav-active' : ''}`}
+            onClick={() => onNavigate('cookbook')}
+            aria-current={page === 'cookbook' ? 'page' : undefined}
+          >
             Recipe Book
           </button>
         </div>
@@ -63,7 +82,7 @@ function Navbar() {
   );
 }
 
-function Footer() {
+function Footer({ onNavigate }) {
   const year = new Date().getFullYear();
   return (
     <footer className="footer">
@@ -82,21 +101,20 @@ function Footer() {
           © {year} Code a Cuisine. All rights reserved.
         </p>
         <nav className="footer-legal" aria-label="Legal links">
-          <a href="#">Privacy Policy</a>
+          <button className="footer-legal-link" onClick={() => onNavigate('privacy')}>
+            Privacy Policy
+          </button>
           <span aria-hidden="true">·</span>
-          <a href="#">Terms of Service</a>
+          <button className="footer-legal-link" onClick={() => onNavigate('terms')}>
+            Terms of Service
+          </button>
         </nav>
       </div>
     </footer>
   );
 }
 
-function App() {
-  const [screen, setScreen] = useState('ingredients');
-  const [ingredients, setIngredients] = useState([]);
-  const [preferences, setPreferences] = useState(DEFAULT_PREFS);
-  const [recipes, setRecipes] = useState([]);
-
+function GeneratorFlow({ screen, setScreen, ingredients, setIngredients, preferences, setPreferences, recipes, setRecipes }) {
   const handleGenerate = async () => {
     setScreen('loading');
     const payload = {
@@ -124,15 +142,11 @@ function App() {
     return <LoadingScreen />;
   }
 
-  // Step indicator only on preferences (ingredients uses the hero left-column badge instead)
-  const stepNum = screen === 'preferences' ? 2 : null;
+  const stepNum = screen === 'preferences' ? 2 : screen === 'ingredients' ? 1 : null;
 
   return (
-    <div className="app">
-      <Navbar />
-
+    <>
       {stepNum !== null && <StepIndicator current={stepNum} />}
-
       <main className="app-main">
         <div key={screen} className={`screen-enter${screen === 'ingredients' ? ' screen-enter--hero' : ''}`}>
           {screen === 'ingredients' && (
@@ -155,10 +169,66 @@ function App() {
           )}
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  const [page, setPage] = useState('generator');
+  const [screen, setScreen] = useState('ingredients');
+  const [ingredients, setIngredients] = useState([]);
+  const [preferences, setPreferences] = useState(DEFAULT_PREFS);
+  const [recipes, setRecipes] = useState([]);
+
+  const handleNavigate = (destination) => {
+    setPage(destination);
+  };
+
+  const isCookbook = page === 'cookbook';
+  const isLegal = page === 'terms' || page === 'privacy';
+
+  return (
+    <div className="app">
+      <Navbar page={page} onNavigate={handleNavigate} />
+
+      {page === 'generator' && (
+        <GeneratorFlow
+          screen={screen}
+          setScreen={setScreen}
+          ingredients={ingredients}
+          setIngredients={setIngredients}
+          preferences={preferences}
+          setPreferences={setPreferences}
+          recipes={recipes}
+          setRecipes={setRecipes}
+        />
+      )}
+
+      {isCookbook && (
+        <main className="app-main">
+          <div className="screen-enter screen-enter--cookbook">
+            <CookbookPage />
+          </div>
+        </main>
+      )}
+
+      {page === 'terms' && (
+        <main className="app-main">
+          <div className="screen-enter screen-enter--legal">
+            <TermsPage onNavigate={handleNavigate} />
+          </div>
+        </main>
+      )}
+
+      {page === 'privacy' && (
+        <main className="app-main">
+          <div className="screen-enter screen-enter--legal">
+            <PrivacyPage onNavigate={handleNavigate} />
+          </div>
+        </main>
+      )}
+
+      <Footer onNavigate={handleNavigate} />
+    </div>
+  );
+}
